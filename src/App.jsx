@@ -3,6 +3,8 @@ import FileUpload from "./components/FileUpload";
 import ControlBar from "./components/ControlBar";
 import FeatureList from "./components/FeatureList";
 import GraphView from "./components/GraphView"; // Suhas 
+import './styles/globals.css';
+
 
 function Main() {
   const { model, graph, searchHits } = useApp();

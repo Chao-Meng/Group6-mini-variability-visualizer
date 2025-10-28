@@ -1,0 +1,6 @@
+/* highlight for search hits */
+.hit {
+  background: #fff3bf;  
+  border-radius: 6px;
+  padding: 2px 6px;
+}

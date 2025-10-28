@@ -1,0 +1,14 @@
+{
+  "root": "SmartHome",
+  "features": [
+    { "id": "SmartHome", "label": "Smart Home", "type": "mandatory" },
+    { "id": "Sensors", "label": "Sensors", "type": "mandatory", "parent": "SmartHome" },
+    { "id": "Temperature", "label": "Temperature Sensor", "type": "optional", "parent": "Sensors" },
+    { "id": "Motion", "label": "Motion Sensor", "type": "optional", "parent": "Sensors" },
+    { "id": "Camera", "label": "Security Camera", "type": "optional", "parent": "SmartHome" },
+    { "id": "CloudService", "label": "Cloud Service", "type": "optional", "parent": "SmartHome" }
+  ],
+  "constraints": [
+    { "type": "requires", "a": "Camera", "b": "CloudService" }
+  ]
+}

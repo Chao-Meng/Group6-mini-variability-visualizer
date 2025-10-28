@@ -1,35 +1,34 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { AppProvider, useApp } from "./state/store";
+import FileUpload from "./components/FileUpload";
+import ControlBar from "./components/ControlBar";
+import FeatureList from "./components/FeatureList";
+import GraphView from "./components/GraphView"; // Suhas 
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Main() {
+  const { model, graph, searchHits } = useApp();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="p-4 flex flex-col gap-4">
+      <h1>Mini Variability Visualizer</h1>
+      <FileUpload />
+      <ControlBar />
+      {!model && <p>Upload a JSON feature model to begin.</p>}
+      {model && (
+        <>
+          {/* can delete before submit */}
+          <FeatureList />
+
+          {/* pass graph and searchHits to Suhas's GraphView */}
+          <GraphView graph={graph} highlights={searchHits} model={model} />
+        </>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AppProvider>
+      <Main />
+    </AppProvider>
+  );
+}

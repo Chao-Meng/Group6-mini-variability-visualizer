@@ -1,6 +1,8 @@
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from "lucide-react";
+import { useApp } from "../state/store";
+import { searchFeatures } from "../core/search";
 
 /* --------------------- LEGEND DATA --------------------- */
 const legendItems = [
@@ -50,19 +52,14 @@ const legendItems = [
 function useKeyboardShortcuts(toggleLegend, toggleFullscreen, isFullscreen) {
   useEffect(() => {
     const handleKey = (e) => {
-      // Shift + L → toggle legend
       if (e.shiftKey && e.key.toLowerCase() === "l") {
         e.preventDefault();
         toggleLegend();
       }
-
-      // Shift + F → toggle fullscreen
       if (e.shiftKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
         toggleFullscreen();
       }
-
-      // Escape → exit fullscreen
       if (e.key === "Escape" && isFullscreen) {
         e.preventDefault();
         document.exitFullscreen();
@@ -107,7 +104,7 @@ function drawLinks(g, root) {
   return links;
 }
 
-function drawNodes(g, root) {
+function drawNodes(g, root, model, setSearchHits, setQuery) {
   const color = (d) =>
     d.data.type === "mandatory"
       ? "#43a047"
@@ -127,7 +124,15 @@ function drawNodes(g, root) {
     .attr("stroke", "#fff")
     .attr("stroke-width", 2)
     .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.15))")
-    .style("cursor", "pointer");
+    .style("cursor", "pointer")
+    // ✅ Double-click node to search and highlight — but stop zoom propagation
+    .on("dblclick", (event, d) => {
+      event.stopPropagation();
+      const query = d.data.label || d.data.id;
+      setQuery(query);
+      const hits = searchFeatures(model.features, query);
+      setSearchHits(hits);
+    });
 
   g.append("g")
     .selectAll("text")
@@ -226,13 +231,11 @@ function applyZoom(svg, g, viewWidth, viewHeight, zoomRef) {
     g.attr("transform", e.transform);
     zoomRef.current = e.transform;
   });
-  svg.call(zoom);
+  svg.call(zoom); // double-click zoom still active on SVG background
 
   const bbox = g.node().getBBox();
   const scale =
     Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
-
-  // ✅ FIXED centering logic
   const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
   const translateY = Math.max(
     50,
@@ -301,6 +304,8 @@ export default function GraphView({ graph, highlights = [], model }) {
   const [showLegend, setShowLegend] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const { setSearchHits, setQuery } = useApp();
+
   const toggleLegend = () => setShowLegend((v) => !v);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -345,11 +350,11 @@ export default function GraphView({ graph, highlights = [], model }) {
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     const links = drawLinks(g, root);
-    const nodes = drawNodes(g, root);
+    const nodes = drawNodes(g, root, model, setSearchHits, setQuery);
     drawConstraints(g, model, root);
     applyHighlights(nodes, links, highlights, root);
     applyZoom(svg, g, viewWidth, viewHeight, zoomRef);
-  }, [model, graph, highlights]);
+  }, [model, graph, highlights, setSearchHits, setQuery]);
 
   return (
     <div
@@ -359,26 +364,26 @@ export default function GraphView({ graph, highlights = [], model }) {
       }`}
     >
       <div
-        className={`w-full  max-h-[1000px] rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
-          isFullscreen ? "max-w-none h-full" : ""
+        className={`w-full rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
+          isFullscreen ? "max-w-none h-full" : "max-h-[1000px]"
         }`}
       >
         {/* Header */}
         <div className="w-full flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
           <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
-            Feature Legend
+            Visualizer Legend
           </h3>
           <div className="flex gap-2">
             <button
               onClick={toggleLegend}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition-all"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-full border transition-all"
             >
               {showLegend ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              {showLegend ? "Hide" : "Show"}
+              {showLegend ? "Hide Legend" : "Show Legend"}
             </button>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition-all"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-full border transition-all"
             >
               {isFullscreen ? (
                 <>

@@ -75,7 +75,7 @@ export default function FeatureListPanel() {
                 }`}
               ></span>
               <span
-                className={`truncate text-[15px] font-medium ${
+                className={`truncate text-base font-medium ${
                   isSearchHit ? "text-blue-300" : "text-gray-100"
                 }`}
               >
@@ -84,7 +84,7 @@ export default function FeatureListPanel() {
             </div>
 
             {/* Second row: ID + Parent */}
-            <div className="mt-1 ml-5 flex flex-col text-xs font-mono text-gray-400 leading-tight">
+            <div className="mt-1 ml-5 flex flex-col text-sm font-mono text-gray-400 leading-tight">
               <span>({f.id})</span>
               {f.parent && <span>↳ {f.parent}</span>}
             </div>
@@ -103,8 +103,8 @@ export default function FeatureListPanel() {
         className={`fixed z-40 flex flex-col backdrop-blur-md transition-all duration-500 ease-in-out ${
           isMobile
             ? `bottom-0 left-0 w-full max-h-[65%] rounded-t-2xl`
-            : `top-0 left-0 h-full w-[300px]`
-        } bg-gray-900/80 border-r border-gray-700/40 shadow-2xl text-gray-100 ${
+            : `top-0 left-0 h-full w-[320px]`
+        } bg-gray-900 border-r border-gray-700/40 shadow-2xl text-gray-100 ${
           open
             ? "translate-x-0 opacity-100"
             : isMobile
@@ -114,7 +114,7 @@ export default function FeatureListPanel() {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700/40">
-          <h2 className="text-sm font-semibold tracking-wide text-gray-200">
+          <h2 className=" font-semibold tracking-wide text-gray-200">
             Features
           </h2>
           <button
@@ -137,7 +137,7 @@ export default function FeatureListPanel() {
 
         {/* Footer info */}
         {searchHits?.length > 0 && (
-          <div className="px-4 py-2 text-[11px] text-blue-300/70 font-mono border-t border-gray-700/40 bg-gray-800/60">
+          <div className="px-4 py-2 text-sm text-blue-300/70 font-mono border-t border-gray-700/40 bg-gray-800/60">
             {searchHits.length} feature
             {searchHits.length > 1 ? "s" : ""} matched your search.
           </div>
@@ -156,7 +156,7 @@ export default function FeatureListPanel() {
           title="Open feature list (Shift + M)"
         >
           <ChevronRight size={18} />
-          {isMobile && <span className="text-sm font-medium">Features</span>}
+          {isMobile && <span className=" font-medium">Features</span>}
         </button>
       )}
     </>

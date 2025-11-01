@@ -2,14 +2,14 @@ import { AppProvider, useApp } from "./state/store";
 import FileUpload from "./components/FileUpload";
 import ControlBar from "./components/ControlBar";
 import FeatureList from "./components/FeatureList";
-import GraphView from "./components/GraphView"; // Suhas 
-import './styles/globals.css';
-
+import GraphView from "./components/GraphView"; // Suhas
+import "./index.css";
+import "./styles/globals.css";
 
 function Main() {
   const { model, graph, searchHits } = useApp();
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col justify-center items-center gap-4 w-full h-full min-h-screen">
       <h1>Mini Variability Visualizer</h1>
       <FileUpload />
       <ControlBar />

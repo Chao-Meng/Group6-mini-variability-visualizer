@@ -11,9 +11,10 @@ function Main() {
   return (
     <div className="p-4 flex flex-col justify-center items-center gap-4 w-full h-full min-h-screen">
       <h1>Mini Variability Visualizer</h1>
-      <SearchBar />
+
       {model && (
         <>
+          <SearchBar />
           {/* can delete before submit */}
           <FeatureList />
 

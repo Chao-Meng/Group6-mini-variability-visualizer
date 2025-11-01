@@ -6,7 +6,7 @@ import { useApp } from "../state/store";
 import { UploadCloud, FileJson, RefreshCcw } from "lucide-react";
 
 export default function FileUpload() {
-  const { model, setModel, setGraph } = useApp();
+  const { setModel, setGraph } = useApp();
   const [dragActive, setDragActive] = useState(false);
   const [fileName, setFileName] = useState(null);
 

@@ -6,6 +6,7 @@ import { searchFeatures } from "../core/search";
 
 /* --------------------- LEGEND DATA --------------------- */
 const legendItems = [
+  // Node types
   {
     shape: "circle",
     color: "#43a047",
@@ -18,6 +19,16 @@ const legendItems = [
     label: "Optional Feature",
     sub: "May or may not be selected.",
   },
+
+  // Tree structure link
+  {
+    shape: "line",
+    color: "#bbb",
+    label: "Tree Link",
+    sub: "Parent to child relationship in the feature tree.",
+  },
+
+  // Constraints (curved overlays)
   {
     shape: "line",
     color: "#2196f3",
@@ -32,19 +43,37 @@ const legendItems = [
     label: "Excludes Constraint",
     sub: "A and B cannot coexist.",
   },
+
+  // Constraint endpoints (the small dots drawn at each end)
+  {
+    shape: "circle",
+    color: "#2196f3",
+    stroke: "#2196f3",
+    label: "Constraint Endpoint (requires)",
+    sub: "Markers at endpoints of a requires curve.",
+  },
+  {
+    shape: "circle",
+    color: "#e53935",
+    stroke: "#e53935",
+    label: "Constraint Endpoint (excludes)",
+    sub: "Markers at endpoints of an excludes curve.",
+  },
+
+  // Highlight system (stroke colors on nodes/links)
   {
     shape: "circle",
     color: "#e53935",
     stroke: "#e53935",
     label: "Highlighted Feature",
-    sub: "Feature selected or matched via search.",
+    sub: "Exact match from search or direct selection.",
   },
   {
     shape: "circle",
     color: "#f48fb1",
     stroke: "#f48fb1",
     label: "Related Branch",
-    sub: "Connected ancestor or descendant.",
+    sub: "Ancestors and descendants of a highlight.",
   },
 ];
 
@@ -254,43 +283,65 @@ function applyZoom(svg, g, viewWidth, viewHeight, zoomRef) {
 function LegendSection({ showLegend }) {
   return (
     <div
-      className={`transition-all duration-500 overflow-hidden ${
-        showLegend ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+      className={`transition-all duration-500 ${
+        showLegend
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 -translate-y-3 pointer-events-none absolute"
       }`}
+      style={{
+        position: showLegend ? "relative" : "absolute",
+        width: "100%",
+      }}
     >
-      <div className="w-full bg-white border-b border-gray-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 px-6 py-4 text-sm">
-        {legendItems.map((item, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className="mt-1">
-              {item.shape === "circle" ? (
-                <span
-                  className="inline-block rounded-full"
-                  style={{
-                    background: item.color,
-                    width: 14,
-                    height: 14,
-                    border: "1px solid #ccc",
-                  }}
-                ></span>
-              ) : (
-                <span
-                  className="inline-block"
-                  style={{
-                    borderTop: `2px ${item.dash ? "dashed" : "solid"} ${
-                      item.color
-                    }`,
-                    width: 18,
-                    display: "block",
-                  }}
-                ></span>
-              )}
+      <div className="w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm px-8 py-5 text-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
+            Visualizer Legend
+          </h3>
+          <span className="text-xs text-gray-500 font-mono">9 items</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-4">
+          {legendItems.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-3 p-2 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <div className="mt-1 flex-shrink-0">
+                {item.shape === "circle" ? (
+                  <span
+                    className="inline-block rounded-full shadow-sm"
+                    style={{
+                      background: item.color,
+                      width: 16,
+                      height: 16,
+                      border: "1px solid rgba(0,0,0,0.15)",
+                    }}
+                  ></span>
+                ) : (
+                  <span
+                    className="inline-block"
+                    style={{
+                      borderTop: `2px ${item.dash ? "dashed" : "solid"} ${
+                        item.color
+                      }`,
+                      width: 22,
+                      display: "block",
+                    }}
+                  ></span>
+                )}
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-gray-800 font-medium text-[13.5px]">
+                  {item.label}
+                </span>
+                <span className="text-gray-600 text-[12px] mt-0.5">
+                  {item.sub}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-gray-800 font-medium">{item.label}</span>
-              <span className="text-gray-600 text-xs">{item.sub}</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -402,7 +453,7 @@ export default function GraphView({ graph, highlights = [], model }) {
         <LegendSection showLegend={showLegend} />
 
         {/* Graph */}
-        <div className="w-full flex-1 overflow-auto bg-gradient-to-b from-gray-50 to-gray-100 flex">
+        <div className="w-full flex-1 bg-gradient-to-b from-gray-50 to-gray-100 flex">
           <div className="flex-1 min-h-[800px] flex">
             <svg
               ref={svgRef}

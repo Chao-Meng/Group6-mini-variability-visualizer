@@ -50,10 +50,25 @@ const legendItems = [
 function useKeyboardShortcuts(toggleLegend, toggleFullscreen, isFullscreen) {
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key.toLowerCase() === "l") toggleLegend();
-      if (e.key.toLowerCase() === "f") toggleFullscreen();
-      if (e.key === "Escape" && isFullscreen) document.exitFullscreen();
+      // Shift + L → toggle legend
+      if (e.shiftKey && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        toggleLegend();
+      }
+
+      // Shift + F → toggle fullscreen
+      if (e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+
+      // Escape → exit fullscreen
+      if (e.key === "Escape" && isFullscreen) {
+        e.preventDefault();
+        document.exitFullscreen();
+      }
     };
+
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [isFullscreen, toggleLegend, toggleFullscreen]);
@@ -339,7 +354,7 @@ export default function GraphView({ graph, highlights = [], model }) {
       }`}
     >
       <div
-        className={`w-full max-w-[1200px] rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
+        className={`w-full rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
           isFullscreen ? "max-w-none h-[95vh]" : ""
         }`}
       >

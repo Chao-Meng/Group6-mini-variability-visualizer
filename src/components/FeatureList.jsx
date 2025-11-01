@@ -12,12 +12,19 @@
 //     </ul>
 //   );
 // }
+
 import { useApp } from "../state/store";
 import { ChevronLeft } from "lucide-react";
 
 export default function FeatureList() {
-  const { model, searchHits } = useApp();
+  const { model, searchHits, setHighlights, setSearchHits } = useApp();
   if (!model) return null;
+
+  const handleDoubleClick = (featureId) => {
+    // Reset search to this feature
+    setHighlights?.([featureId]);
+    setSearchHits?.([]); // optional – clears previous search hits
+  };
 
   return (
     <div className="w-full max-w-[900px] mx-auto my-4 rounded-lg border border-gray-700/30 bg-gray-900/30 backdrop-blur-sm text-gray-100 shadow-md p-4">
@@ -31,7 +38,8 @@ export default function FeatureList() {
           return (
             <li
               key={f.id}
-              className={`flex items-center justify-between px-3 py-2 rounded-md transition-all duration-200 
+              onDoubleClick={() => handleDoubleClick(f.id)}
+              className={`flex items-center justify-between px-3 py-2 rounded-md transition-all duration-200 cursor-pointer select-none
                 ${
                   hit
                     ? "bg-blue-500/10 border border-blue-400/40"

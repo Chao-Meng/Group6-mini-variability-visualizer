@@ -10,7 +10,7 @@ function Main() {
   const { model, graph, searchHits } = useApp();
   return (
     <div className="p-4 flex flex-col justify-center items-center gap-4 w-full h-full min-h-screen">
-      <h1 className="mx-auto text-center text-xl md:text-4xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
+      <h1 className="mx-auto text-center text-xl md:text-5xl mt-2 font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
         Mini Feature Variability Visualizer
       </h1>
 

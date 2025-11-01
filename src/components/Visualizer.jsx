@@ -6,7 +6,6 @@ import { searchFeatures } from "../core/search";
 
 /* --------------------- LEGEND DATA --------------------- */
 const legendItems = [
-  // Node types
   {
     shape: "circle",
     color: "#43a047",
@@ -19,16 +18,12 @@ const legendItems = [
     label: "Optional Feature",
     sub: "May or may not be selected.",
   },
-
-  // Tree structure link
   {
     shape: "line",
     color: "#bbb",
     label: "Tree Link",
     sub: "Parent to child relationship in the feature tree.",
   },
-
-  // Constraints (curved overlays)
   {
     shape: "line",
     color: "#2196f3",
@@ -43,8 +38,6 @@ const legendItems = [
     label: "Excludes Constraint",
     sub: "A and B cannot coexist.",
   },
-
-  // Constraint endpoints (the small dots drawn at each end)
   {
     shape: "circle",
     color: "#2196f3",
@@ -59,8 +52,6 @@ const legendItems = [
     label: "Constraint Endpoint (excludes)",
     sub: "Markers at endpoints of an excludes curve.",
   },
-
-  // Highlight system (stroke colors on nodes/links)
   {
     shape: "circle",
     color: "#e53935",
@@ -102,23 +93,25 @@ function useKeyboardShortcuts(toggleLegend, toggleFullscreen, isFullscreen) {
 
 /* --------------------- UTIL FUNCTIONS --------------------- */
 function buildHierarchy(model) {
-  const featureMap = {};
-  model.features.forEach((f) => (featureMap[f.id] = { ...f, children: [] }));
-  model.features.forEach((f) => {
-    if (f.parent && featureMap[f.parent]) {
-      featureMap[f.parent].children.push(featureMap[f.id]);
+  const featureById = {};
+  model.features.forEach(
+    (feature) => (featureById[feature.id] = { ...feature, children: [] })
+  );
+  model.features.forEach((feature) => {
+    if (feature.parent && featureById[feature.parent]) {
+      featureById[feature.parent].children.push(featureById[feature.id]);
     }
   });
-  const rootFeature = model.features.find((f) => !f.parent);
-  return rootFeature ? d3.hierarchy(featureMap[rootFeature.id]) : null;
+  const rootFeature = model.features.find((feature) => !feature.parent);
+  return rootFeature ? d3.hierarchy(featureById[rootFeature.id]) : null;
 }
 
 /* --------------------- D3 DRAW FUNCTIONS --------------------- */
-function drawLinks(g, root) {
-  const linkGroup = g.append("g");
-  const links = linkGroup
+function drawLinks(treeContainer, rootNode) {
+  const linkGroup = treeContainer.append("g");
+  return linkGroup
     .selectAll("path")
-    .data(root.links())
+    .data(rootNode.links())
     .join("path")
     .attr("fill", "none")
     .attr("stroke", "#bbb")
@@ -127,221 +120,202 @@ function drawLinks(g, root) {
       "d",
       d3
         .linkVertical()
-        .x((d) => d.x)
-        .y((d) => d.y)
+        .x((p) => p.x)
+        .y((p) => p.y)
     );
-  return links;
 }
 
-function drawNodes(g, root, model, setSearchHits, setQuery) {
-  const color = (d) =>
-    d.data.type === "mandatory"
+function drawNodes(treeContainer, rootNode, model, setSearchHits, setQuery) {
+  const colorForNode = (node) =>
+    node.data.type === "mandatory"
       ? "#43a047"
-      : d.data.type === "optional"
+      : node.data.type === "optional"
       ? "#1e88e5"
       : "#999";
 
-  const nodes = g
+  const nodeSelection = treeContainer
     .append("g")
     .selectAll("circle")
-    .data(root.descendants())
+    .data(rootNode.descendants())
     .join("circle")
-    .attr("cx", (d) => d.x)
-    .attr("cy", (d) => d.y)
+    .attr("cx", (node) => node.x)
+    .attr("cy", (node) => node.y)
     .attr("r", 25)
-    .attr("fill", color)
+    .attr("fill", colorForNode)
     .attr("stroke", "#fff")
     .attr("stroke-width", 2)
     .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.15))")
     .style("cursor", "pointer")
-    // ✅ Double-click node to search and highlight — but stop zoom propagation
-    .on("dblclick", (event, d) => {
+    .on("dblclick", (event, node) => {
       event.stopPropagation();
-      const query = d.data.label || d.data.id;
+      const query = node.data.label || node.data.id;
       setQuery(query);
       const hits = searchFeatures(model.features, query);
       setSearchHits(hits);
     });
 
-  // ✅ Helper: wrap long labels and auto-center vertically
   function wrapText(textSelection, widthLimit = 130) {
-    textSelection.each(function (d) {
-      const text = d3.select(this);
-      const words = (d.data.label || "").split(/\s+/).reverse();
-      let line = [];
-      let lineNumber = 0;
-      const lineHeight = 1.1; // em
-      const y = text.attr("y");
-      const dy = parseFloat(text.attr("dy")) || 0;
-      let tspan = text
+    textSelection.each(function (node) {
+      const textElement = d3.select(this);
+      const words = (node.data.label || "").split(/\s+/).reverse();
+      let currentLine = [];
+      let lineCount = 0;
+      const lineHeightEm = 1.1;
+      const y = textElement.attr("y");
+      const dy = parseFloat(textElement.attr("dy")) || 0;
+
+      let tspan = textElement
         .text(null)
         .append("tspan")
-        .attr("x", text.attr("x"))
+        .attr("x", textElement.attr("x"))
         .attr("y", y)
         .attr("dy", dy + "em");
 
       let word;
       while ((word = words.pop())) {
-        line.push(word);
-        tspan.text(line.join(" "));
+        currentLine.push(word);
+        tspan.text(currentLine.join(" "));
         if (tspan.node().getComputedTextLength() > widthLimit) {
-          line.pop();
-          tspan.text(line.join(" "));
-          line = [word];
-          tspan = text
+          currentLine.pop();
+          tspan.text(currentLine.join(" "));
+          currentLine = [word];
+          tspan = textElement
             .append("tspan")
-            .attr("x", text.attr("x"))
+            .attr("x", textElement.attr("x"))
             .attr("y", y)
-            .attr("dy", ++lineNumber * lineHeight + dy + "em")
+            .attr("dy", ++lineCount * lineHeightEm + dy + "em")
             .text(word);
         }
       }
 
-      // Adjust position based on line count (centers multi-line labels)
-      const totalLines = lineNumber + 1;
-      const offset = ((totalLines - 1) * lineHeight * 6) / 2; // pixel correction
-      text.attr(
+      const totalLines = lineCount + 1;
+      const verticalOffsetPx = ((totalLines - 1) * lineHeightEm * 6) / 2;
+      textElement.attr(
         "transform",
-        `translate(0, ${-offset + (d.children ? -10 : 15)})`
+        `translate(0, ${-verticalOffsetPx + (node.children ? -10 : 15)})`
       );
     });
   }
 
-  // ✅ Text with vertical centering fix
-  g.append("g")
+  treeContainer
+    .append("g")
     .selectAll("text")
-    .data(root.descendants())
+    .data(rootNode.descendants())
     .join("text")
-    .attr("x", (d) => d.x)
-    .attr("y", (d) => (d.children ? d.y - 35 : d.y + 40))
+    .attr("x", (node) => node.x)
+    .attr("y", (node) => (node.children ? node.y - 35 : node.y + 40))
     .attr("text-anchor", "middle")
     .attr("font-size", 13)
     .attr("fill", "#333")
     .attr("dy", 0)
-    .text((d) => d.data.label)
+    .text((node) => node.data.label)
     .call(wrapText, 120);
 
-  return nodes;
+  return nodeSelection;
 }
 
-function drawConstraints(g, model, root) {
-  const allNodes = {};
-  root.descendants().forEach((n) => (allNodes[n.data.id] = n));
-  const constraintGroup = g.append("g");
+function drawConstraints(treeContainer, model, rootNode) {
+  const nodeById = {};
+  rootNode.descendants().forEach((node) => (nodeById[node.data.id] = node));
+  const constraintLayer = treeContainer.append("g");
 
-  (model.constraints || []).forEach((c) => {
-    const a = allNodes[c.a];
-    const b = allNodes[c.b];
-    if (!a || !b) return;
+  (model.constraints || []).forEach((constraint) => {
+    const sourceNode = nodeById[constraint.a];
+    const targetNode = nodeById[constraint.b];
+    if (!sourceNode || !targetNode) return;
 
-    const curveAmt = Math.max(80, Math.abs(a.y - b.y) / 3);
-    const line = d3
+    const controlMagnitude = Math.max(
+      80,
+      Math.abs(sourceNode.y - targetNode.y) / 3
+    );
+    const pathData = d3
       .line()
       .curve(d3.curveBasis)
-      .x((d) => d.x)
-      .y((d) => d.y);
-    const pathData = line([
-      { x: a.x, y: a.y },
-      { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - curveAmt },
-      { x: b.x, y: b.y },
+      .x((p) => p.x)
+      .y((p) => p.y)([
+      { x: sourceNode.x, y: sourceNode.y },
+      {
+        x: (sourceNode.x + targetNode.x) / 2,
+        y: (sourceNode.y + targetNode.y) / 2 - controlMagnitude,
+      },
+      { x: targetNode.x, y: targetNode.y },
     ]);
 
-    constraintGroup
+    constraintLayer
       .append("path")
       .attr("d", pathData)
       .attr("fill", "none")
-      .attr("stroke", c.type === "requires" ? "#2196f3" : "#e53935")
+      .attr("stroke", constraint.type === "requires" ? "#2196f3" : "#e53935")
       .attr("stroke-width", 2)
-      .attr("stroke-dasharray", c.type === "requires" ? "4 3" : "6 4")
+      .attr("stroke-dasharray", constraint.type === "requires" ? "4 3" : "6 4")
       .attr("opacity", 0.9);
 
-    [a, b].forEach((n) => {
-      constraintGroup
+    [sourceNode, targetNode].forEach((node) => {
+      constraintLayer
         .append("circle")
-        .attr("cx", n.x)
-        .attr("cy", n.y)
+        .attr("cx", node.x)
+        .attr("cy", node.y)
         .attr("r", 4)
-        .attr("fill", c.type === "requires" ? "#2196f3" : "#e53935")
+        .attr("fill", constraint.type === "requires" ? "#2196f3" : "#e53935")
         .attr("stroke", "#fff")
         .attr("stroke-width", 1.5);
     });
   });
 }
 
-function applyHighlights(nodes, links, highlights, root) {
-  if (!highlights?.length) return;
+function applyHighlights(
+  nodeSelection,
+  linkSelection,
+  highlightedIds,
+  rootNode
+) {
+  if (!highlightedIds?.length) return;
 
-  const highlightSet = new Set(highlights);
-  const related = new Set();
+  const highlighted = new Set(highlightedIds);
+  const relatedNodes = new Set();
 
-  root.descendants().forEach((n) => {
-    if (highlightSet.has(n.data.id)) {
-      related.add(n);
-      n.ancestors().forEach((a) => related.add(a));
-      n.descendants().forEach((a) => related.add(a));
+  rootNode.descendants().forEach((node) => {
+    if (highlighted.has(node.data.id)) {
+      relatedNodes.add(node);
+      node.ancestors().forEach((ancestor) => relatedNodes.add(ancestor));
+      node.descendants().forEach((descendant) => relatedNodes.add(descendant));
     }
   });
 
-  nodes
-    .attr("stroke", (d) =>
-      highlightSet.has(d.data.id)
+  nodeSelection
+    .attr("stroke", (node) =>
+      highlighted.has(node.data.id)
         ? "#e53935"
-        : related.has(d)
+        : relatedNodes.has(node)
         ? "#f48fb1"
         : "#fff"
     )
-    .attr("stroke-width", (d) =>
-      highlightSet.has(d.data.id) ? 5 : related.has(d) ? 3 : 2
+    .attr("stroke-width", (node) =>
+      highlighted.has(node.data.id) ? 5 : relatedNodes.has(node) ? 3 : 2
     );
 
-  links.attr("stroke", (d) => {
-    const s = d?.source;
-    const t = d?.target;
-    if (!s || !t) return "#bbb";
-    return related.has(s) && related.has(t) ? "#f48fb1" : "#bbb";
+  linkSelection.attr("stroke", (link) => {
+    const source = link?.source;
+    const target = link?.target;
+    if (!source || !target) return "#bbb";
+    return relatedNodes.has(source) && relatedNodes.has(target)
+      ? "#f48fb1"
+      : "#bbb";
   });
-}
-
-function applyZoom(svg, g, viewWidth, viewHeight, zoomRef) {
-  const zoom = d3.zoom().on("zoom", (e) => {
-    g.attr("transform", e.transform);
-    zoomRef.current = e.transform;
-  });
-  svg.call(zoom); // double-click zoom still active on SVG background
-
-  const bbox = g.node().getBBox();
-  const scale =
-    Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
-  const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
-  const translateY = Math.max(
-    50,
-    (viewHeight - bbox.height * scale) / 3 - bbox.y * scale
-  );
-
-  const initialTransform = d3.zoomIdentity
-    .translate(translateX, translateY)
-    .scale(scale);
-
-  svg.transition().duration(500).call(zoom.transform, initialTransform);
-  zoomRef.current = initialTransform;
 }
 
 /* --------------------- LEGEND COMPONENT --------------------- */
 function LegendSection({ showLegend }) {
   return (
     <div
-      className={`transition-all duration-500 ${
-        showLegend
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 -translate-y-3 pointer-events-none absolute"
-      }`}
-      style={{
-        position: showLegend ? "relative" : "absolute",
-        width: "100%",
-      }}
+      className={[
+        "transition-all duration-300 overflow-hidden",
+        showLegend ? "opacity-100 max-h-[1200px]" : "opacity-0 max-h-0",
+      ].join(" ")}
+      style={{ width: "100%" }}
+      aria-hidden={!showLegend}
     >
       <div className="w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm px-8 py-5 text-sm">
-        {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
             Visualizer Legend
@@ -349,12 +323,9 @@ function LegendSection({ showLegend }) {
         </div>
 
         {/* Feature Legend Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-4 mb-8">
-          {legendItems.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 p-2 rounded-md transition-colors"
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-4 mb-4">
+          {legendItems.map((item, index) => (
+            <div key={index} className="flex items-start gap-3 p-2 rounded-md">
               <div className="mt-1 flex-shrink-0">
                 {item.shape === "circle" ? (
                   <span
@@ -365,7 +336,7 @@ function LegendSection({ showLegend }) {
                       height: 16,
                       border: "1px solid rgba(0,0,0,0.15)",
                     }}
-                  ></span>
+                  />
                 ) : (
                   <span
                     className="inline-block"
@@ -376,7 +347,7 @@ function LegendSection({ showLegend }) {
                       width: 22,
                       display: "block",
                     }}
-                  ></span>
+                  />
                 )}
               </div>
               <div className="flex flex-col leading-tight">
@@ -391,26 +362,27 @@ function LegendSection({ showLegend }) {
           ))}
         </div>
 
-        {/* 🔥 Hotkeys Section */}
+        {/* Keyboard Shortcuts */}
         <div className="border-t border-gray-200 pt-4">
           <h4 className="text-gray-800 font-semibold text-sm mb-3">
             Keyboard Shortcuts
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 text-[13px] text-gray-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-[13px] text-gray-700">
             {[
               { key: "Shift + S", desc: "Focus search bar" },
               { key: "Shift + L", desc: "Toggle legend visibility" },
               { key: "Shift + F", desc: "Toggle fullscreen mode" },
               { key: "Shift + M", desc: "Open feature list panel" },
-            ].map((k, i) => (
+              { key: "Shift + Scroll", desc: "Zoom in and out of graph view" },
+            ].map((shortcut) => (
               <div
-                key={i}
+                key={shortcut.key}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-50 border border-gray-200"
               >
                 <kbd className="bg-gray-800 text-white px-2 py-0.5 rounded text-xs font-mono tracking-wide">
-                  {k.key}
+                  {shortcut.key}
                 </kbd>
-                <span className="text-gray-700">{k.desc}</span>
+                <span className="text-gray-700">{shortcut.desc}</span>
               </div>
             ))}
           </div>
@@ -419,6 +391,7 @@ function LegendSection({ showLegend }) {
     </div>
   );
 }
+
 
 /* --------------------- MAIN COMPONENT --------------------- */
 export default function GraphView({ graph, highlights = [], model }) {
@@ -441,13 +414,13 @@ export default function GraphView({ graph, highlights = [], model }) {
     }
   };
 
-  // Refs to hold layout info and zoom instance
-  const graphRef = useRef({
-    svg: null,
-    g: null,
+  // D3 graph state
+  const graphStateRef = useRef({
+    svgSelection: null,
+    treeContainer: null,
     viewWidth: 0,
     viewHeight: 0,
-    zoom: null,
+    zoomBehavior: null,
     initialTransform: null,
   });
 
@@ -456,95 +429,156 @@ export default function GraphView({ graph, highlights = [], model }) {
   useEffect(() => {
     if (!model?.features?.length) return;
 
-    const svgEl = d3.select(svgRef.current);
-    svgEl.selectAll("*").remove();
+    const svgSelection = d3.select(svgRef.current);
+    svgSelection.selectAll("*").remove();
     zoomRef.current = d3.zoomIdentity;
 
-    const svg = svgEl
+    const svg = svgSelection
       .attr("width", "100%")
       .attr("height", "100%")
       .style("background", "linear-gradient(180deg,#fafafa 0%,#eef1f4 100%)");
 
-    const root = buildHierarchy(model);
-    if (!root) return;
+    const rootNode = buildHierarchy(model);
+    if (!rootNode) return;
 
+    // Layout
     const treeLayout = d3.tree().nodeSize([140, 200]);
-    treeLayout(root);
+    treeLayout(rootNode);
 
-    const xExtent = d3.extent(root.descendants(), (d) => d.x);
-    const yExtent = d3.extent(root.descendants(), (d) => d.y);
+    const xExtent = d3.extent(rootNode.descendants(), (node) => node.x);
+    const yExtent = d3.extent(rootNode.descendants(), (node) => node.y);
     const margin = { top: 100, right: 200, bottom: 200, left: 200 };
     const viewWidth = xExtent[1] - xExtent[0] + margin.left + margin.right;
     const viewHeight = yExtent[1] - yExtent[0] + margin.top + margin.bottom;
     svg.attr("viewBox", [0, 0, viewWidth, viewHeight]);
 
-    const g = svg
+    const treeContainer = svg
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const links = drawLinks(g, root);
-    const nodes = drawNodes(g, root, model, setSearchHits, setQuery);
-    drawConstraints(g, model, root);
-    applyHighlights(nodes, links, highlights, root);
+    // Draw
+    const linkSelection = drawLinks(treeContainer, rootNode);
+    const nodeSelection = drawNodes(
+      treeContainer,
+      rootNode,
+      model,
+      setSearchHits,
+      setQuery
+    );
+    drawConstraints(treeContainer, model, rootNode);
+    applyHighlights(nodeSelection, linkSelection, highlights, rootNode);
 
-    // ✅ Create and store a single zoom instance
-    const zoom = d3.zoom().on("zoom", (e) => {
-      g.attr("transform", e.transform);
-      zoomRef.current = e.transform;
-    });
-    svg.call(zoom);
+    // Zoom behavior with Shift-only wheel zoom
+    const zoomBehavior = d3
+      .zoom()
+      .filter((event) => {
+        // Allow drag/pan with mouse, allow double-click, allow touch.
+        // For wheel events, only allow when Shift is pressed.
+        if (event.type === "wheel") return event.shiftKey === true;
+        return (
+          !event.ctrlKey ||
+          event.type === "dblclick" ||
+          event.type === "touchstart"
+        );
+      })
+      .on("zoom", (event) => {
+        treeContainer.attr("transform", event.transform);
+        zoomRef.current = event.transform;
+      });
 
-    // ✅ Auto-center the graph initially
-    const bbox = g.node().getBBox();
-    const scale =
-      Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
-    const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
-    const translateY = (viewHeight - bbox.height * scale) / 2 - bbox.y * scale;
+    svg.call(zoomBehavior);
+
+    // Initial fit-to-view transform
+    const boundingBox = treeContainer.node().getBBox();
+    const fitScale =
+      Math.min(viewWidth / boundingBox.width, viewHeight / boundingBox.height) *
+      0.8;
+    const fitTx =
+      (viewWidth - boundingBox.width * fitScale) / 2 - boundingBox.x * fitScale;
+    const fitTy =
+      (viewHeight - boundingBox.height * fitScale) / 2 -
+      boundingBox.y * fitScale;
     const initialTransform = d3.zoomIdentity
-      .translate(translateX, translateY)
-      .scale(scale);
-    svg.transition().duration(600).call(zoom.transform, initialTransform);
+      .translate(fitTx, fitTy)
+      .scale(fitScale);
+
+    svg
+      .transition()
+      .duration(600)
+      .call(zoomBehavior.transform, initialTransform);
     zoomRef.current = initialTransform;
 
-    // store graph info (including zoom)
-    graphRef.current = {
-      svg,
-      g,
+    // Persist graph state
+    graphStateRef.current = {
+      svgSelection: svg,
+      treeContainer,
       viewWidth,
       viewHeight,
-      zoom,
+      zoomBehavior,
       initialTransform,
     };
   }, [model, graph, highlights, setSearchHits, setQuery]);
 
-  // --- Working Align + Reset ---
+  // --- Align Center (pan only, keep current zoom level) ---
   const handleAlignCenter = () => {
-    const { svg, g, viewWidth, viewHeight, zoom } = graphRef.current;
-    if (!svg || !g || !zoom) return;
+    const { svgSelection, treeContainer, viewWidth, viewHeight, zoomBehavior } =
+      graphStateRef.current;
+    if (!svgSelection || !treeContainer || !zoomBehavior) return;
 
-    const bbox = g.node().getBBox();
-    const scale =
-      Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
-    const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
-    const translateY = (viewHeight - bbox.height * scale) / 2 - bbox.y * scale;
+    const currentTransform = zoomRef.current || d3.zoomIdentity;
+    const currentScale = currentTransform.k;
+
+    const bbox = treeContainer.node().getBBox();
+
+    const translateX =
+      (viewWidth - bbox.width * currentScale) / 2 - bbox.x * currentScale;
+    const translateY =
+      (viewHeight - bbox.height * currentScale) / 2 - bbox.y * currentScale;
+
+    const centeredTransform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(currentScale);
+    svgSelection
+      .transition()
+      .duration(500)
+      .call(zoomBehavior.transform, centeredTransform);
+    zoomRef.current = centeredTransform;
+  };
+
+  // --- Reset Zoom (restore default zoom scale around current viewport center) ---
+  const handleResetZoom = () => {
+    const { svgSelection, zoomBehavior, initialTransform } =
+      graphStateRef.current;
+    if (!svgSelection || !zoomBehavior || !initialTransform) return;
+
+    const currentTransform = zoomRef.current || d3.zoomIdentity;
+    const defaultScale = initialTransform.k;
+
+    // Determine viewport center in screen coordinates
+    const svgElement = svgSelection.node();
+    const viewportRect = svgElement.getBoundingClientRect();
+    const centerX = viewportRect.width / 2;
+    const centerY = viewportRect.height / 2;
+
+    // Convert screen center to graph coordinates under current transform
+    const graphCenterX = (centerX - currentTransform.x) / currentTransform.k;
+    const graphCenterY = (centerY - currentTransform.y) / currentTransform.k;
+
+    // Compute new translation that keeps the same visual center
+    const newTranslateX = centerX - graphCenterX * defaultScale;
+    const newTranslateY = centerY - graphCenterY * defaultScale;
 
     const newTransform = d3.zoomIdentity
-      .translate(translateX, translateY)
-      .scale(scale);
-    svg.transition().duration(600).call(zoom.transform, newTransform);
+      .translate(newTranslateX, newTranslateY)
+      .scale(defaultScale);
+
+    svgSelection
+      .transition()
+      .duration(500)
+      .call(zoomBehavior.transform, newTransform);
     zoomRef.current = newTransform;
   };
 
-  const handleResetZoom = () => {
-    const { svg, zoom, initialTransform } = graphRef.current;
-    if (!svg || !zoom) return;
-
-    const target = initialTransform || d3.zoomIdentity;
-    svg.transition().duration(600).call(zoom.transform, target);
-    zoomRef.current = target;
-  };
-
-  // --- Render ---
   return (
     <div
       ref={containerRef}
@@ -566,7 +600,7 @@ export default function GraphView({ graph, highlights = [], model }) {
           ></svg>
         </div>
 
-        {/* 🧭 Floating Graph Controls */}
+        {/* Floating Graph Controls */}
         <div className="absolute top-4 right-4 flex flex-col gap-2">
           <button
             onClick={handleAlignCenter}
@@ -617,7 +651,7 @@ export default function GraphView({ graph, highlights = [], model }) {
           </div>
         </div>
 
-        {/* Legend */}
+        {/* Legend (now collapses smoothly, stays in-flow) */}
         <LegendSection showLegend={showLegend} />
       </div>
     </div>

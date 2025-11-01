@@ -341,13 +341,15 @@ function LegendSection({ showLegend }) {
       }}
     >
       <div className="w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm px-8 py-5 text-sm">
+        {/* Header */}
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
             Visualizer Legend
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-4">
+        {/* Feature Legend Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-4 mb-8">
           {legendItems.map((item, i) => (
             <div
               key={i}
@@ -388,6 +390,31 @@ function LegendSection({ showLegend }) {
             </div>
           ))}
         </div>
+
+        {/* 🔥 Hotkeys Section */}
+        <div className="border-t border-gray-200 pt-4">
+          <h4 className="text-gray-800 font-semibold text-sm mb-3">
+            Keyboard Shortcuts
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 text-[13px] text-gray-700">
+            {[
+              { key: "Shift + S", desc: "Focus search bar" },
+              { key: "Shift + L", desc: "Toggle legend visibility" },
+              { key: "Shift + F", desc: "Toggle fullscreen mode" },
+              { key: "Shift + M", desc: "Open feature list panel" },
+            ].map((k, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gray-50 border border-gray-200"
+              >
+                <kbd className="bg-gray-800 text-white px-2 py-0.5 rounded text-xs font-mono tracking-wide">
+                  {k.key}
+                </kbd>
+                <span className="text-gray-700">{k.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -414,6 +441,15 @@ export default function GraphView({ graph, highlights = [], model }) {
     }
   };
 
+  // Refs to hold layout info and zoom instance
+  const graphRef = useRef({
+    svg: null,
+    g: null,
+    viewWidth: 0,
+    viewHeight: 0,
+    zoom: null,
+  });
+
   useKeyboardShortcuts(toggleLegend, toggleFullscreen, isFullscreen);
 
   useEffect(() => {
@@ -421,7 +457,6 @@ export default function GraphView({ graph, highlights = [], model }) {
 
     const svgEl = d3.select(svgRef.current);
     svgEl.selectAll("*").remove();
-
     zoomRef.current = d3.zoomIdentity;
 
     const svg = svgEl
@@ -450,37 +485,114 @@ export default function GraphView({ graph, highlights = [], model }) {
     const nodes = drawNodes(g, root, model, setSearchHits, setQuery);
     drawConstraints(g, model, root);
     applyHighlights(nodes, links, highlights, root);
-    applyZoom(svg, g, viewWidth, viewHeight, zoomRef);
+
+    // ✅ Create and store a single zoom instance
+    const zoom = d3.zoom().on("zoom", (e) => {
+      g.attr("transform", e.transform);
+      zoomRef.current = e.transform;
+    });
+    svg.call(zoom);
+
+    // ✅ Auto-center the graph initially
+    const bbox = g.node().getBBox();
+    const scale =
+      Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
+    const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
+    const translateY = (viewHeight - bbox.height * scale) / 2 - bbox.y * scale;
+    const initialTransform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(scale);
+    svg.transition().duration(600).call(zoom.transform, initialTransform);
+    zoomRef.current = initialTransform;
+
+    // store graph info (including zoom)
+    graphRef.current = { svg, g, viewWidth, viewHeight, zoom };
   }, [model, graph, highlights, setSearchHits, setQuery]);
 
+  // --- Working Align + Reset ---
+  const handleAlignCenter = () => {
+    const { svg, g, viewWidth, viewHeight, zoom } = graphRef.current;
+    if (!svg || !g || !zoom) return;
+
+    const bbox = g.node().getBBox();
+    const scale =
+      Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
+    const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
+    const translateY = (viewHeight - bbox.height * scale) / 2 - bbox.y * scale;
+
+    const newTransform = d3.zoomIdentity
+      .translate(translateX, translateY)
+      .scale(scale);
+    svg.transition().duration(600).call(zoom.transform, newTransform);
+    zoomRef.current = newTransform;
+  };
+
+  const handleResetZoom = () => {
+    const { svg, zoom } = graphRef.current;
+    if (!svg || !zoom) return;
+    svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity);
+    zoomRef.current = d3.zoomIdentity;
+  };
+
+  // --- Render ---
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full flex flex-col items-center justify-center p-4 ${
+      className={`relative w-full flex flex-col items-center justify-start min-h-[100vh] p-2 sm:p-4 ${
         isFullscreen ? "bg-black/90" : ""
       }`}
     >
+      {/* Graph Section */}
       <div
-        className={`w-full rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
-          isFullscreen ? "max-w-none h-full" : "max-h-[1000px]"
+        className={`relative w-full flex-1 rounded-lg shadow-sm overflow-hidden border border-gray-200 transition-all duration-300 bg-gradient-to-b from-gray-50 to-gray-100 ${
+          isFullscreen ? "max-w-none h-full" : "min-h-[75vh] sm:min-h-[80vh]"
         }`}
       >
-        {/* Header */}
-        <div className="w-full flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        <div className="absolute inset-0 overflow-auto">
+          <svg
+            ref={svgRef}
+            className="w-full h-full block"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
+        </div>
+
+        {/* 🧭 Floating Graph Controls */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2">
+          <button
+            onClick={handleAlignCenter}
+            className="px-3 py-1.5 bg-slate-900 text-white text-xs rounded-md shadow hover:bg-slate-800 transition"
+            title="Align graph to center"
+          >
+            Align Center
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="px-3 py-1.5 bg-slate-900 text-white text-xs rounded-md shadow hover:bg-slate-800 transition"
+            title="Reset zoom"
+          >
+            Reset Zoom
+          </button>
+        </div>
+      </div>
+
+      {/* Control + Legend Section */}
+      <div className="w-full mt-4 bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg shadow-sm flex flex-col items-center transition-all duration-300">
+        {/* Buttons */}
+        <div className="w-full flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-t-lg">
           <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
-            Visualizer Legend
+            Visualizer Controls
           </h3>
           <div className="flex gap-2">
             <button
               onClick={toggleLegend}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900 text-white"
             >
               {showLegend ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               {showLegend ? "Hide Legend" : "Show Legend"}
             </button>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900 text-white"
             >
               {isFullscreen ? (
                 <>
@@ -497,17 +609,6 @@ export default function GraphView({ graph, highlights = [], model }) {
 
         {/* Legend */}
         <LegendSection showLegend={showLegend} />
-
-        {/* Graph */}
-        <div className="w-full flex-1 bg-gradient-to-b from-gray-50 to-gray-100 flex">
-          <div className="flex-1 min-h-[800px] flex">
-            <svg
-              ref={svgRef}
-              className="w-full h-full block flex-1"
-              preserveAspectRatio="xMidYMid meet"
-            ></svg>
-          </div>
-        </div>
       </div>
     </div>
   );

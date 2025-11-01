@@ -1,25 +1,11 @@
-// import { useApp } from "../state/store";
-
-// // List all features from the model
-// export default function FeatureList() {
-//   const { model } = useApp();
-//   if (!model) return null;
-//   return (
-//     <ul>
-//       {model.features.map(f => (
-//         <li key={f.id}>{f.label} ({f.id}) {f.parent ? `← ${f.parent}` : ""}</li>
-//       ))}
-//     </ul>
-//   );
-// }
 import { useState, useEffect } from "react";
 import { useApp } from "../state/store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { searchFeatures } from "../core/search";
 
 export default function FeatureListPanel() {
-  const { model, searchHits, setSearchHits, query, setQuery } = useApp();
-  const [open, setOpen] = useState(true);
+  const { model, searchHits, setSearchHits, setQuery } = useApp();
+  const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -47,6 +33,68 @@ export default function FeatureListPanel() {
     setSearchHits(hits);
     if (isMobile) setOpen(false);
   };
+
+  // Build hierarchy from parent relationships
+  const buildHierarchy = (features) => {
+    const map = {};
+    features.forEach((f) => (map[f.id] = { ...f, children: [] }));
+    features.forEach((f) => {
+      if (f.parent && map[f.parent]) {
+        map[f.parent].children.push(map[f.id]);
+      }
+    });
+    return features.filter((f) => !f.parent).map((f) => map[f.id]);
+  };
+
+  const roots = buildHierarchy(model.features);
+
+  // Recursive rendering
+  const renderTree = (nodes, depth = 0) =>
+    nodes.map((f) => {
+      const isSearchHit = searchHits?.includes(f.id);
+      return (
+        <div key={f.id}>
+          <div
+            onClick={() => handleClick(f)}
+            style={{ marginLeft: depth * 14 }}
+            className={`px-3 py-2 rounded-md cursor-pointer border border-transparent select-none transition-all duration-150 ${
+              isSearchHit
+                ? "bg-blue-500/10 border-blue-400/40"
+                : "hover:bg-gray-800/60"
+            }`}
+          >
+            {/* Top row: feature name */}
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                  f.type === "mandatory"
+                    ? "bg-green-500"
+                    : f.type === "optional"
+                    ? "bg-blue-400"
+                    : "bg-gray-400"
+                }`}
+              ></span>
+              <span
+                className={`truncate text-[15px] font-medium ${
+                  isSearchHit ? "text-blue-300" : "text-gray-100"
+                }`}
+              >
+                {f.label}
+              </span>
+            </div>
+
+            {/* Second row: ID + Parent */}
+            <div className="mt-1 ml-5 flex flex-col text-xs font-mono text-gray-400 leading-tight">
+              <span>({f.id})</span>
+              {f.parent && <span>↳ {f.parent}</span>}
+            </div>
+          </div>
+
+          {/* Recursively render children */}
+          {f.children?.length > 0 && renderTree(f.children, depth + 1)}
+        </div>
+      );
+    });
 
   return (
     <>
@@ -84,47 +132,7 @@ export default function FeatureListPanel() {
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-3 pr-2 custom-scroll">
-          {model.features.map((f) => {
-            const isSearchHit = searchHits?.includes(f.id);
-
-            return (
-              <div
-                key={f.id}
-                onClick={() => handleClick(f)}
-                className={`px-3 py-2 rounded-md cursor-pointer border border-transparent select-none transition-all duration-150 ${
-                  isSearchHit
-                    ? "bg-blue-500/10 border-blue-400/40"
-                    : "hover:bg-gray-800/60"
-                }`}
-              >
-                {/* Top row: feature name */}
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                      f.type === "mandatory"
-                        ? "bg-green-500"
-                        : f.type === "optional"
-                        ? "bg-blue-400"
-                        : "bg-gray-400"
-                    }`}
-                  ></span>
-                  <span
-                    className={`truncate text-[15px] font-medium ${
-                      isSearchHit ? "text-blue-300" : "text-gray-100"
-                    }`}
-                  >
-                    {f.label}
-                  </span>
-                </div>
-
-                {/* Second row: ID + Parent */}
-                <div className="mt-1 ml-5 flex flex-col text-xs font-mono text-gray-400 leading-tight">
-                  <span>({f.id})</span>
-                  {f.parent && <span>↳ {f.parent}</span>}
-                </div>
-              </div>
-            );
-          })}
+          {renderTree(roots)}
         </div>
 
         {/* Footer info */}

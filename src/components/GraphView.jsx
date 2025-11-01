@@ -231,8 +231,14 @@ function applyZoom(svg, g, viewWidth, viewHeight, zoomRef) {
   const bbox = g.node().getBBox();
   const scale =
     Math.min(viewWidth / bbox.width, viewHeight / bbox.height) * 0.8;
+
+  // ✅ FIXED centering logic
   const translateX = (viewWidth - bbox.width * scale) / 2 - bbox.x * scale;
-  const translateY = (viewHeight - bbox.height * scale) / 2 - bbox.y * scale;
+  const translateY = Math.max(
+    50,
+    (viewHeight - bbox.height * scale) / 3 - bbox.y * scale
+  );
+
   const initialTransform = d3.zoomIdentity
     .translate(translateX, translateY)
     .scale(scale);
@@ -314,7 +320,6 @@ export default function GraphView({ graph, highlights = [], model }) {
     const svgEl = d3.select(svgRef.current);
     svgEl.selectAll("*").remove();
 
-    // Always reset zoom when model changes
     zoomRef.current = d3.zoomIdentity;
 
     const svg = svgEl
@@ -354,7 +359,7 @@ export default function GraphView({ graph, highlights = [], model }) {
       }`}
     >
       <div
-        className={`w-full max-w-[1600px] min-h-[800px] rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
+        className={`w-full  max-h-[1000px] rounded-lg shadow-sm bg-white/95 backdrop-blur-md overflow-hidden border border-gray-200 flex flex-col transition-all duration-300 ${
           isFullscreen ? "max-w-none h-full" : ""
         }`}
       >
@@ -392,8 +397,14 @@ export default function GraphView({ graph, highlights = [], model }) {
         <LegendSection showLegend={showLegend} />
 
         {/* Graph */}
-        <div className="w-full flex-1 flex justify-center items-center overflow-auto bg-gradient-to-b from-gray-50 to-gray-100">
-          <svg ref={svgRef}></svg>
+        <div className="w-full flex-1 overflow-auto bg-gradient-to-b from-gray-50 to-gray-100 flex">
+          <div className="flex-1 min-h-[800px] flex">
+            <svg
+              ref={svgRef}
+              className="w-full h-full block flex-1"
+              preserveAspectRatio="xMidYMid meet"
+            ></svg>
+          </div>
         </div>
       </div>
     </div>

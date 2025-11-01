@@ -15,7 +15,7 @@ export default function ControlBar() {
   }
 
   return (
-    <form onSubmit={onSearch} className="flex gap-2">
+    <form onSubmit={onSearch} className="flex gap-2 mb-1 mt-4">
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}

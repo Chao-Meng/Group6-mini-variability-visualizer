@@ -345,14 +345,13 @@ function LegendSection({ showLegend }) {
           <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
             Visualizer Legend
           </h3>
-          <span className="text-xs text-gray-500 font-mono">9 items</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-4">
           {legendItems.map((item, i) => (
             <div
               key={i}
-              className="flex items-start gap-3 p-2 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex items-start gap-3 p-2 rounded-md transition-colors"
             >
               <div className="mt-1 flex-shrink-0">
                 {item.shape === "circle" ? (
@@ -474,14 +473,14 @@ export default function GraphView({ graph, highlights = [], model }) {
           <div className="flex gap-2">
             <button
               onClick={toggleLegend}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-full border transition-all"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900"
             >
               {showLegend ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               {showLegend ? "Hide Legend" : "Show Legend"}
             </button>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-full border transition-all"
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-full border transition-all cursor-pointer hover:bg-slate-800 bg-slate-900"
             >
               {isFullscreen ? (
                 <>

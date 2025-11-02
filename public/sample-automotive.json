@@ -2,12 +2,42 @@
   "root": "Car",
   "features": [
     { "id": "Car", "label": "Car", "type": "mandatory" },
-    { "id": "Engine", "label": "Engine", "type": "mandatory", "parent": "Car" },
-    { "id": "ElectricMotor", "label": "Electric Motor", "type": "optional", "parent": "Engine" },
-    { "id": "Gasoline", "label": "Gasoline Engine", "type": "optional", "parent": "Engine" },
-    { "id": "Safety", "label": "Safety Features", "type": "mandatory", "parent": "Car" },
-    { "id": "Airbag", "label": "Airbag", "type": "optional", "parent": "Safety" },
-    { "id": "ABS", "label": "ABS System", "type": "optional", "parent": "Safety" }
+    {
+      "id": "Engine",
+      "label": "Main Engine",
+      "type": "mandatory",
+      "parent": "Car"
+    },
+    {
+      "id": "ElectricMotor",
+      "label": "Electric Motor",
+      "type": "optional",
+      "parent": "Engine"
+    },
+    {
+      "id": "Gasoline",
+      "label": "Gasoline Engine",
+      "type": "optional",
+      "parent": "Engine"
+    },
+    {
+      "id": "Safety",
+      "label": "Safety Features",
+      "type": "mandatory",
+      "parent": "Car"
+    },
+    {
+      "id": "Airbag",
+      "label": "Airbag",
+      "type": "optional",
+      "parent": "Safety"
+    },
+    {
+      "id": "ABS",
+      "label": "ABS System",
+      "type": "optional",
+      "parent": "Safety"
+    }
   ],
   "constraints": [
     { "type": "requires", "a": "ElectricMotor", "b": "ABS" },

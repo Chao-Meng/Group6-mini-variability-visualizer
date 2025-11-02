@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useApp } from "../state/store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { searchFeatures } from "../core/search";
-import { buildFeatureHierarchy } from "../core/buildFeatureHierarchy";
+import buildFeatureHierarchy from "../core/buildFeatureHierarchy";
 
 /**
  * FeatureListPanel

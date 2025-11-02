@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { buildFeatureHierarchy } from "../../core/buildFeatureHierarchy";
+import buildFeatureHierarchy from "../../core/buildFeatureHierarchy";
 
 /**
  * Utility for deep extraction of hierarchy as plain objects for easier verification.

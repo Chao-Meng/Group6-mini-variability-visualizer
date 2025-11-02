@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { buildFeatureHierarchy } from "../buildFeatureHierarchy";
+import buildFeatureHierarchy from "../buildFeatureHierarchy";
 
 /**
  * Helper to simplify tree snapshots by extracting only IDs and children.

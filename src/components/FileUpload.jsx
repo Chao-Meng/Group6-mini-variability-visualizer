@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { loadJSONFile } from "../data/loaders/jsonLoader";
-import { validateModel } from "../core/parser";
-import { buildGraph } from "../core/model";
 import { useApp } from "../state/store";
 import { UploadCloud, FileJson, RefreshCcw } from "lucide-react";
+import processUploadedFile from "../core/processUploadedFile";
 
 /**
  * FileUpload
@@ -15,33 +13,16 @@ export default function FileUpload() {
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState(null);
 
-  /**
-   * Reads and validates the uploaded JSON model file.
-   * If valid, sets model and graph states; otherwise alerts user.
-   */
-  async function processUploadedFile(file) {
-    try {
-      const jsonData = await loadJSONFile(file);
-      const { ok: isValid, errors: validationErrors } = validateModel(jsonData);
-
-      if (!isValid) {
-        alert("Invalid model:\n" + validationErrors.join("\n"));
-        return;
-      }
-
-      const graphData = buildGraph(jsonData.features);
-      setModel(jsonData);
-      setGraph(graphData);
-      setUploadedFileName(file.name);
-    } catch (error) {
-      alert("Failed to load file: " + error.message);
-    }
-  }
-
   /** Handles file selection via file input */
   async function handleFileInputChange(event) {
     const selectedFile = event.target.files?.[0];
-    if (selectedFile) await processUploadedFile(selectedFile);
+    if (selectedFile)
+      await processUploadedFile(
+        selectedFile,
+        setModel,
+        setGraph,
+        setUploadedFileName
+      );
   }
 
   /** Drag-and-drop event handlers */
@@ -99,9 +80,8 @@ export default function FileUpload() {
           Upload Feature Model
         </h2>
         <p className="text-sm text-gray-400 mb-4">
-          Drop your{" "}
-          <span className="text-blue-400 font-mono">.json</span> file here, or
-          click anywhere to browse.
+          Drop your <span className="text-blue-400 font-mono">.json</span> file
+          here, or click anywhere to browse.
         </p>
 
         <input

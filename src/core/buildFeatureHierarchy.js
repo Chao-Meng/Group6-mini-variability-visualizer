@@ -3,7 +3,7 @@
  * Handles invalid parents, duplicates, missing IDs, and circular references.
  */
 // eslint-disable-next-line react-refresh/only-export-components
-export function buildFeatureHierarchy(featureArray) {
+export default function buildFeatureHierarchy(featureArray) {
   if (!Array.isArray(featureArray) || featureArray.length === 0) return [];
 
   // Step 1: Filter valid entries

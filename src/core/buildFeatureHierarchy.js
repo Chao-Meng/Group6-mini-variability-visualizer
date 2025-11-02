@@ -2,7 +2,7 @@
  * Builds a hierarchical feature tree from a flat list of features.
  * Handles invalid parents, duplicates, missing IDs, and circular references.
  */
-// eslint-disable-next-line react-refresh/only-export-components
+
 export default function buildFeatureHierarchy(featureArray) {
   if (!Array.isArray(featureArray) || featureArray.length === 0) return [];
 

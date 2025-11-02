@@ -16,13 +16,20 @@ export default function FileUpload() {
   /** Handles file selection via file input */
   async function handleFileInputChange(event) {
     const selectedFile = event.target.files?.[0];
-    if (selectedFile)
+    if (!selectedFile) return;
+
+    try {
       await processUploadedFile(
         selectedFile,
         setModel,
         setGraph,
         setUploadedFileName
       );
+    } catch (err) {
+      alert(
+        "Failed to load file: " + (err instanceof Error ? err.message : err)
+      );
+    }
   }
 
   /** Drag-and-drop event handlers */

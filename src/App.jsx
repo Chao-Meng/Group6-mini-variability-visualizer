@@ -5,6 +5,7 @@ import FeatureList from "./components/FeatureList";
 import Visualizer from "./components/Visualizer";
 import "./index.css";
 import "./styles/globals.css";
+import JsonUploadInstructions from "./components/JsonUploadInstructions";
 
 /**
  * Main
@@ -31,6 +32,7 @@ function Main() {
         </>
       )}
       <FileUpload />
+      <JsonUploadInstructions />
     </div>
   );
 }

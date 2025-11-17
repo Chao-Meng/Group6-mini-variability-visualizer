@@ -10,7 +10,6 @@ import {
   beforeAll,
 } from "vitest";
 
-// Mock the core deps used by processUploadedFile
 vi.mock("../../data/loaders/jsonLoader", () => ({
   loadJSONFile: vi.fn(),
 }));
@@ -28,7 +27,6 @@ import { validateModel } from "../parser";
 import { buildGraph } from "../model";
 import processUploadedFile from "../processUploadedFile";
 
-// ✅ Prevent jsdom/parse5 ESM conflict by mocking File cleanly
 beforeAll(() => {
   class MockFile {
     constructor(chunks, name, options = {}) {

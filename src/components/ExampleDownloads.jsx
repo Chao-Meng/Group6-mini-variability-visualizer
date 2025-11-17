@@ -1,5 +1,3 @@
-import React from "react";
-
 const ExampleDownloads = () => {
   const samples = [
     { name: "Automotive System", file: "sample-automotive.json" },

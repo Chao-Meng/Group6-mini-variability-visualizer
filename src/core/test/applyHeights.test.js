@@ -1,7 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import applyHighlights from "../applyHighlights";
 
-/* ---------------- Mock Helpers ---------------- */
 
 function createFakeSelection() {
   const attrs = {};
@@ -26,8 +25,6 @@ function makeNode(id) {
     descendants: vi.fn(() => []),
   };
 }
-
-/* ---------------- Tests ---------------- */
 
 describe("applyHighlights", () => {
   let nodeSel;

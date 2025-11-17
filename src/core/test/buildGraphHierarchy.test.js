@@ -1,8 +1,6 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import buildGraphHierarchy from "../buildGraphHierarchy";
 
-/* ---------------- Tests ---------------- */
-
 describe("buildGraphHierarchy", () => {
   let model;
 
@@ -46,7 +44,7 @@ describe("buildGraphHierarchy", () => {
       features: [
         { id: "root" },
         { id: "child1", parent: "root" },
-        { id: "child2", parent: "nonexistent" }, // invalid parent
+        { id: "child2", parent: "nonexistent" },
       ],
     };
     const hierarchy = buildGraphHierarchy(invalidModel);
@@ -74,11 +72,8 @@ describe("buildGraphHierarchy", () => {
     const hierarchy = buildGraphHierarchy(model);
     const allNodes = hierarchy.descendants();
 
-    // d3.hierarchy() performs depth-first pre-order traversal
-    // given our model order, actual order is root -> a -> b -> c
     expect(allNodes.map((d) => d.data.id)).toEqual(["root", "a", "b", "c"]);
 
-    // verify total count and unique IDs
     expect(allNodes.length).toBe(4);
     const unique = new Set(allNodes.map((n) => n.data.id));
     expect(unique.size).toBe(4);

@@ -1,10 +1,6 @@
 import { describe, test, expect } from "vitest";
 import buildFeatureHierarchy from "../../core/buildFeatureHierarchy";
 
-/**
- * Utility for deep extraction of hierarchy as plain objects for easier verification.
- * It prevents noise from recursive references in snapshots.
- */
 type FeatureNode = { id: string; children?: FeatureNode[] };
 
 function extractHierarchy(featureNodes: FeatureNode[]): { id: string; children: any[] }[] {

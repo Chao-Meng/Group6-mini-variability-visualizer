@@ -4,17 +4,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { searchFeatures } from "../core/search";
 import buildFeatureHierarchy from "../core/buildFeatureHierarchy";
 
-/**
- * FeatureListPanel
- * Displays a collapsible sidebar or bottom sheet (on mobile)
- * that shows a hierarchical list of features with search integration.
- */
 export default function FeatureListPanel() {
   const { model, searchHits, setSearchHits, setQuery } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
 
-  /** Detect mobile vs desktop view */
+  // Detect mobile vs desktop view
   useEffect(() => {
     const handleResize = () => setIsMobileView(window.innerWidth < 768);
     handleResize(); // initialize immediately
@@ -22,7 +17,7 @@ export default function FeatureListPanel() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  /** Keyboard shortcut: Shift + M toggles panel visibility */
+  // Keyboard shortcut: Shift + M toggles panel visibility
   useEffect(() => {
     const handleKeydown = (event) => {
       if (event.shiftKey && event.key.toLowerCase() === "m") {
@@ -35,7 +30,7 @@ export default function FeatureListPanel() {
 
   if (!model) return null;
 
-  /** Handles clicking a feature item */
+  // Handles clicking a feature item
   const handleFeatureClick = (feature) => {
     const featureQuery = feature.label || feature.id;
     setQuery(featureQuery);
@@ -46,7 +41,7 @@ export default function FeatureListPanel() {
 
   const rootFeatures = buildFeatureHierarchy(model.features);
 
-  /** Recursively render feature hierarchy */
+  // Recursively render feature hierarchy
   const renderFeatureTree = (featureNodes, depth = 0) =>
     featureNodes.map((feature) => {
       const isHighlighted = searchHits?.includes(feature.id);
@@ -61,7 +56,6 @@ export default function FeatureListPanel() {
                 : "hover:bg-gray-800/60"
             }`}
           >
-            {/* Feature name row */}
             <div className="flex items-center gap-2">
               <span
                 className={`w-3 h-3 rounded-full shrink-0 ${
@@ -81,14 +75,12 @@ export default function FeatureListPanel() {
               </span>
             </div>
 
-            {/* Metadata row (ID and parent) */}
             <div className="mt-1 ml-5 flex flex-col text-sm font-mono text-gray-400 leading-tight">
               <span>({feature.id})</span>
               {feature.parent && <span>↳ {feature.parent}</span>}
             </div>
           </div>
 
-          {/* Recursive render for child features */}
           {feature.children?.length > 0 &&
             renderFeatureTree(feature.children, depth + 1)}
         </div>
@@ -114,7 +106,6 @@ export default function FeatureListPanel() {
             : "-translate-x-full opacity-0"
         }`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700/40">
           <h2 className="font-semibold tracking-wide text-gray-200">
             Features
@@ -132,12 +123,10 @@ export default function FeatureListPanel() {
           </button>
         </div>
 
-        {/* Scrollable Feature List */}
         <div className="flex-1 overflow-y-auto p-3 pr-2 custom-scroll">
           {renderFeatureTree(rootFeatures)}
         </div>
 
-        {/* Footer Summary */}
         {searchHits?.length > 0 && (
           <div className="px-4 py-2 text-sm text-blue-300/70 font-mono border-t border-gray-700/40 bg-gray-800/60">
             {searchHits.length} feature
@@ -146,7 +135,6 @@ export default function FeatureListPanel() {
         )}
       </div>
 
-      {/* Floating Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}

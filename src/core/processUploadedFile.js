@@ -2,10 +2,6 @@ import { loadJSONFile } from "../data/loaders/jsonLoader";
 import { validateModel } from "./parser";
 import { buildGraph } from "./model";
 
-/**
- * Reads and validates the uploaded JSON model file.
- * If valid, sets model and graph states; otherwise alerts user.
- */
 export default async function processUploadedFile(
   file,
   setModel,

@@ -129,7 +129,7 @@ export default function GraphView({ graph, highlights = [], model }) {
     };
   }, [model, graph, highlights, setSearchHits, setQuery]);
 
-  // --- Align Center (pan only, keep current zoom level) ---
+  // Align Center (pan only, and maintain keep current zoom level)
   const handleAlignCenter = () => {
     const { svgSelection, treeContainer, viewWidth, viewHeight, zoomBehavior } =
       graphStateRef.current;
@@ -155,7 +155,7 @@ export default function GraphView({ graph, highlights = [], model }) {
     zoomRef.current = centeredTransform;
   };
 
-  // --- Reset Zoom (restore default zoom scale around current viewport center) ---
+  // Reset Zoom (restore default zoom scale around current viewport center)
   const handleResetZoom = () => {
     const { svgSelection, zoomBehavior, initialTransform } =
       graphStateRef.current;
@@ -196,7 +196,6 @@ export default function GraphView({ graph, highlights = [], model }) {
         isFullscreen ? "bg-black/90" : ""
       }`}
     >
-      {/* Graph Section */}
       <div
         className={`relative w-full flex-1 rounded-lg shadow-sm overflow-hidden border border-gray-200 transition-all duration-300 bg-linear-to-b from-gray-50 to-gray-100 ${
           isFullscreen ? "max-w-none h-full" : "min-h-[75vh] sm:min-h-[80vh]"
@@ -210,7 +209,6 @@ export default function GraphView({ graph, highlights = [], model }) {
           ></svg>
         </div>
 
-        {/* Floating Graph Controls */}
         <div className="absolute top-4 right-4 flex flex-col gap-2">
           <button
             onClick={handleAlignCenter}

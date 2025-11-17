@@ -2,14 +2,12 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-// Explicitly import this so Vitest registers jest-dom matchers (fixes toBeInTheDocument)
 import "@testing-library/jest-dom/vitest";
 
 import ControlBar from "../SearchBar";
 import { useApp } from "../../state/store";
 import { searchFeatures } from "../../core/search";
 
-// Mock store and search util
 vi.mock("../../state/store", () => ({
   useApp: vi.fn(),
 }));
@@ -45,7 +43,7 @@ describe("ControlBar Component", () => {
   test("renders search input and icon", () => {
     render(<ControlBar />);
     const input = screen.getByPlaceholderText(/search features/i);
-    expect(input).toBeInTheDocument(); // now works
+    expect(input).toBeInTheDocument();
   });
 
   test("updates query on input change", () => {
@@ -104,7 +102,7 @@ describe("ControlBar Component", () => {
     });
     render(<ControlBar />);
     const noMatch = screen.getByText(/no features match/i);
-    expect(noMatch).toBeInTheDocument(); // now works
+    expect(noMatch).toBeInTheDocument(); 
   });
 
   test("focuses input when Shift+S is pressed", () => {

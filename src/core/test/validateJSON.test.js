@@ -3,13 +3,11 @@
 import { describe, test, expect, vi } from "vitest";
 import validateJSON from "../validateJSON.js";
 
-// Direct imports from public JSON fixtures
 import emptyJSON from "../../../public/error-empty-sample.json";
 import invalidJSON from "../../../public/error-sample-example.json";
 
 describe("validateJSON – structure validation tests", () => {
   test("throws clear error for completely empty JSON", () => {
-    // Should fail because features array is missing
     expect(() => validateJSON(emptyJSON)).toThrowError(
       /'features' array describing all system features/i
     );
@@ -21,8 +19,6 @@ describe("validateJSON – structure validation tests", () => {
     } catch (err) {
       const message = err.message;
 
-      // Instead of assuming "root" comes first,
-      // confirm the message is descriptive and readable
       expect(message).toMatch(/(feature|root|constraint)/i);
       expect(message).toMatch(/(missing|invalid|must be)/i);
       expect(message).not.toMatch(/undefined/i);

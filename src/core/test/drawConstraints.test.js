@@ -1,14 +1,10 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 
-// --- Proper D3 mock (returns callable chain) ---
 vi.mock("d3", () => {
-  // The callable function returned at the end of the chain
   const mockPathGenerator = vi.fn(() => "M0,0L100,100");
 
-  // The core line() factory
   function mockLine() {
     const lineFn = (...args) => mockPathGenerator(...args);
-    // Chainable methods
     lineFn.curve = vi.fn(() => lineFn);
     lineFn.x = vi.fn(() => lineFn);
     lineFn.y = vi.fn(() => lineFn);
@@ -25,14 +21,13 @@ vi.mock("d3", () => {
 import * as d3 from "d3";
 import drawConstraints from "../drawConstraints";
 
-/* ---------------- Mock SVG Selection ---------------- */
 function createMockSvgContainer() {
   const container = {
     append: vi.fn(function () {
-      return container; // chainable
+      return container; 
     }),
     attr: vi.fn(function () {
-      return container; // chainable
+      return container;
     }),
   };
   return container;
@@ -66,21 +61,18 @@ describe("drawConstraints", () => {
   test("creates one group and draws all constraint paths and circles", () => {
     drawConstraints(svgContainer, constraintModel, rootNode);
 
-    // 1 group created
     expect(svgContainer.append).toHaveBeenCalledWith("g");
 
-    // 2 constraints => 1 path + 2 circles each
     const drawnShapes = svgContainer.append.mock.calls
       .map(([tag]) => tag)
       .filter((tag) => tag === "path" || tag === "circle");
     expect(drawnShapes.length).toBe(6);
 
-    // Verify both stroke colors appear
     const strokeColors = svgContainer.attr.mock.calls
       .filter(([k]) => k === "stroke")
       .map(([, v]) => v);
-    expect(strokeColors).toContain("#2196f3"); // requires
-    expect(strokeColors).toContain("#e53935"); // conflicts
+    expect(strokeColors).toContain("#2196f3");
+    expect(strokeColors).toContain("#e53935"); 
   });
 
   test("ignores invalid constraints safely", () => {

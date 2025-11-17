@@ -5,10 +5,6 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import LegendSection from "../LegendSelection";
 
-/**
- * LegendSection tests
- * Verifies render, toggles, keyboard shortcuts, and legend entries.
- */
 
 describe("LegendSection Component", () => {
   const toggleFullscreen = vi.fn();
@@ -21,7 +17,6 @@ describe("LegendSection Component", () => {
     cleanup();
   });
 
-  /* ---------- 1. Initial render ---------- */
   test("renders header, buttons, and legend items", () => {
     render(
       <LegendSection isFullscreen={false} toggleFullscreen={toggleFullscreen} />
@@ -35,13 +30,11 @@ describe("LegendSection Component", () => {
       screen.getByRole("button", { name: /Fullscreen/i })
     ).toBeInTheDocument();
 
-    // Legend title and key item labels
     expect(screen.getByText(/Visualizer Legend/i)).toBeInTheDocument();
     expect(screen.getByText(/Mandatory Feature/i)).toBeInTheDocument();
     expect(screen.getByText(/Tree Link/i)).toBeInTheDocument();
   });
 
-  /* ---------- 2. Legend toggle ---------- */
   test("toggles legend visibility when Hide Legend button is clicked", () => {
     render(
       <LegendSection isFullscreen={false} toggleFullscreen={toggleFullscreen} />
@@ -53,7 +46,6 @@ describe("LegendSection Component", () => {
     ).toBeInTheDocument();
   });
 
-  /* ---------- 3. Fullscreen toggle ---------- */
   test("calls toggleFullscreen when fullscreen button is clicked", () => {
     render(
       <LegendSection isFullscreen={false} toggleFullscreen={toggleFullscreen} />
@@ -65,7 +57,7 @@ describe("LegendSection Component", () => {
     expect(toggleFullscreen).toHaveBeenCalledTimes(1);
   });
 
-  /* ---------- 4. Keyboard shortcuts ---------- */
+
   test("Shift+L toggles legend visibility", () => {
     render(
       <LegendSection isFullscreen={false} toggleFullscreen={toggleFullscreen} />
@@ -89,7 +81,6 @@ describe("LegendSection Component", () => {
   });
 
   test("Escape exits fullscreen mode if currently fullscreen", () => {
-    // Define it manually since jsdom doesn't have it
     Object.defineProperty(document, "exitFullscreen", {
       writable: true,
       configurable: true,
@@ -104,7 +95,6 @@ describe("LegendSection Component", () => {
     expect(document.exitFullscreen).toHaveBeenCalled();
   });
 
-  /* ---------- 5. Legend content ---------- */
   test("renders all expected legend entries", () => {
     render(
       <LegendSection isFullscreen={false} toggleFullscreen={toggleFullscreen} />

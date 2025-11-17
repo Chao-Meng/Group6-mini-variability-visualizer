@@ -13,7 +13,7 @@ const ExampleDownloads = () => {
 
   return (
     <div className="w-full max-w-3xl mt-6 p-5 rounded-xl bg-gray-900/60 border text-center border-gray-700 shadow-md">
-      <h3 className="text-gray-100 bg font-semibold mb-3 flex items-center justify-center gap-2">
+      <h3 className="text-gray-100 font-semibold mb-3 flex items-center justify-center gap-2">
         Download Sample Feature Models
       </h3>
 
@@ -27,8 +27,8 @@ const ExampleDownloads = () => {
             <a
               href={`/${item.file}`}
               download
-              className="flex items-center justify-between bg-gray-800/50 border border-gray-700
-                         px-4 py-2.5 rounded-md text-gray-200 cursor-pointer
+              className="flex items-center justify-between bg-gray-800/50 border border-gray-700 
+                         px-4 py-2.5 rounded-md text-gray-200 cursor-pointer 
                          hover:bg-gray-700/70 transition-colors"
             >
               <span className="text-white">{item.name}</span>

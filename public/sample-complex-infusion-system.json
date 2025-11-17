@@ -2,7 +2,6 @@
   "root": "InfusionPump",
   "features": [
     { "id": "InfusionPump", "label": "Infusion Pump", "type": "mandatory" },
-
     {
       "id": "PowerModule",
       "label": "Power Module",
@@ -27,7 +26,6 @@
       "type": "optional",
       "parent": "PowerModule"
     },
-
     {
       "id": "SafetySystem",
       "label": "Safety and Sensor System",

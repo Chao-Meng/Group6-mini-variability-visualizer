@@ -92,7 +92,7 @@ export default function FileUpload() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-8 space-y-4">
+    <div className="w-full h-full flex flex-col items-center justify-center  space-y-4">
       <label
         htmlFor="file-upload"
         onDragOver={handleDragOver}

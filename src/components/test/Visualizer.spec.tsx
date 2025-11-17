@@ -10,7 +10,6 @@ import GraphView from "../Visualizer";
 
 expect.extend(matchers);
 
-/* ---------------- MOCKS ---------------- */
 
 const mockDrawLinks = vi.fn();
 const mockDrawNodes = vi.fn();
@@ -23,7 +22,6 @@ declare global {
     getBBox?: () => { x: number; y: number; width: number; height: number };
   }
 
-  // d3-zoom attaches a __zoom property to the SVG element at runtime; declare it for tests
   interface SVGSVGElement {
     __zoom?: any;
   }
@@ -66,7 +64,6 @@ function createFakeSelection() {
   return api;
 }
 
-/* ---------------- TESTS ---------------- */
 
 describe("GraphView Component", () => {
   const model = { features: [{ id: "root" }] };
@@ -218,31 +215,26 @@ describe("GraphView Component", () => {
   test("align center updates zoomRef transform (safe single button query)", async () => {
     render(<GraphView graph={{}} model={model} highlights={[]} />);
 
-    // multiple Align Center buttons exist → take the first one
     const alignBtns = screen.getAllByRole("button", { name: /align center/i });
     const alignBtn = alignBtns[0];
     expect(alignBtn).toBeInTheDocument();
 
     await fireEvent.click(alignBtn);
-    // Just verify it clicked successfully, no need to inspect refs
-    expect(mockDrawNodes).toHaveBeenCalled(); // sanity: pipeline intact
+    expect(mockDrawNodes).toHaveBeenCalled();
   });
 
   test("renders LegendSection with correct props (by heading, tolerant)", () => {
     render(<GraphView graph={{}} model={model} highlights={[]} />);
 
-    // There are multiple legends, so check we have at least one
     const legends = screen.getAllByText(/Visualizer Legend/i);
     expect(legends.length).toBeGreaterThan(0);
 
-    // Sanity: the first legend heading should be visible
     expect(legends[0]).toBeVisible();
   });
 
   test("adds black background class when fullscreen is active (unique button)", async () => {
     render(<GraphView graph={{}} model={model} highlights={[]} />);
 
-    // Many 'Fullscreen' buttons exist; pick the first
     const fullscreenBtns = screen.getAllByRole("button", {
       name: /fullscreen/i,
     });

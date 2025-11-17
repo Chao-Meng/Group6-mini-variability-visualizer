@@ -8,18 +8,19 @@ describe("JsonUploadInstructions Component", () => {
     render(<JsonUploadInstructions />);
     expect(screen.getByText(/JSON Upload Guidelines/i)).toBeTruthy();
 
-    const matches = screen.queryAllByText(/To visualize your feature model/i);
+    const matches = screen.queryAllByText(/feature model/i);
     expect(matches.length).toBeGreaterThan(0);
   });
 
   test("contains required structure explanation", () => {
     render(<JsonUploadInstructions />);
 
-    // handle duplicate headings
     const structureHeadings = screen.getAllByText(/Required Structure/i);
     expect(structureHeadings.length).toBeGreaterThan(0);
+  });
 
-    // ensure key field names appear
+  test("includes key field names", () => {
+    render(<JsonUploadInstructions />);
     expect(screen.getAllByText(/root/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/features/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/constraints/i).length).toBeGreaterThan(0);
@@ -41,9 +42,13 @@ describe("JsonUploadInstructions Component", () => {
     const mistakes = screen.getAllByText(/Common Mistakes/i);
     expect(mistakes.length).toBeGreaterThan(0);
 
-    expect(screen.queryAllByText(/Missing or misspelled/i).length).toBeGreaterThan(0);
+    expect(
+      screen.queryAllByText(/Missing or misspelled/i).length
+    ).toBeGreaterThan(0);
     expect(screen.queryAllByText(/Unknown/i).length).toBeGreaterThan(0);
-    expect(screen.queryAllByText(/Constraint references/i).length).toBeGreaterThan(0);
+    expect(
+      screen.queryAllByText(/Constraint references/i).length
+    ).toBeGreaterThan(0);
   });
 
   test("shows final upload tip at the bottom", () => {

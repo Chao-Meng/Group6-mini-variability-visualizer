@@ -8,11 +8,6 @@ import "./styles/globals.css";
 import JsonUploadInstructions from "./components/JsonUploadInstructions";
 import ExampleDownloads from "./components/ExampleDownloads";
 
-/**
- * Main
- * Controls conditional rendering of the app based on model availability.
- * Displays title, search bar, feature list, and the main visualizer view.
- */
 function Main() {
   const { model, graph, searchHits } = useApp();
 
@@ -27,7 +22,6 @@ function Main() {
           <SearchBar />
           <FeatureList />
 
-          {/* pass graph and searchHits to Suhas's Visualizer */}
           <Visualizer graph={graph} highlights={searchHits} model={model} />
         </>
       )}
@@ -38,10 +32,6 @@ function Main() {
   );
 }
 
-/**
- * App
- * Root application component providing global state context.
- */
 export default function App() {
   return (
     <AppProvider>

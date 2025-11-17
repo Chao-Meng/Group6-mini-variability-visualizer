@@ -1,11 +1,6 @@
 import React from "react";
 import { FileJson } from "lucide-react";
 
-/**
- * JsonUploadInstructions
- * A static, user-facing component describing how to properly format and upload JSON files
- * for the Mini Variability Visualizer.
- */
 export default function JsonUploadInstructions() {
   return (
     <div className="w-full max-w-3xl mx-auto mt-6 p-6 bg-gray-900/70 text-gray-200 rounded-2xl border border-gray-700 shadow-lg backdrop-blur-md">
@@ -17,16 +12,12 @@ export default function JsonUploadInstructions() {
       </div>
 
       <p className="text-gray-300 mb-4">
-        To visualize your feature model, please upload a valid{" "}
-        <span className="font-mono text-blue-400">.json</span> file that
-        accurately defines your system's <strong>root feature</strong>, its{" "}
-        <strong>features</strong> hierarchy, and any{" "}
-        <strong>constraints</strong> between features. The uploaded JSON must
-        follow the structure outlined below.
+        To load your feature model, upload a JSON file that defines the root
+        feature, its features list, and any constraints.
       </p>
 
       <h3 className="text-lg font-semibold text-gray-100 mt-6 mb-2">
-        ✅ Required Structure
+        Required Structure
       </h3>
 
       <ul className="list-disc list-inside space-y-2 text-gray-300">
@@ -79,7 +70,7 @@ export default function JsonUploadInstructions() {
       </ul>
 
       <h3 className="text-lg font-semibold text-gray-100 mt-8 mb-2">
-        ⚠️ Common Mistakes
+        Common Mistakes
       </h3>
 
       <ul className="list-disc list-inside space-y-2 text-gray-300">

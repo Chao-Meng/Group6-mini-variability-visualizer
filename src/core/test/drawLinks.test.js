@@ -1,11 +1,8 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 
-// --- Mock D3 globally before import ---
 vi.mock("d3", () => {
-  // Create a mock callable link generator
   const mockPathGenerator = vi.fn(() => "M0,0L100,100");
 
-  // Mock linkVertical factory (returns chainable callable)
   const linkVertical = vi.fn(() => {
     const generator = (...args) => mockPathGenerator(...args);
     generator.x = vi.fn(() => generator);
@@ -22,23 +19,22 @@ vi.mock("d3", () => {
 import * as d3 from "d3";
 import drawLinks from "../drawLinks";
 
-/* ---------------- Mock SVG Selection ---------------- */
 function createMockSvgContainer() {
   const selection = {
     append: vi.fn(function () {
-      return selection; // chainable
+      return selection;
     }),
     selectAll: vi.fn(function () {
-      return selection; // chainable
+      return selection;
     }),
     data: vi.fn(function () {
-      return selection; // chainable
+      return selection; 
     }),
     join: vi.fn(function () {
-      return selection; // chainable
+      return selection; 
     }),
     attr: vi.fn(function () {
-      return selection; // chainable
+      return selection; 
     }),
   };
   return selection;
@@ -66,9 +62,7 @@ describe("drawLinks", () => {
   test("creates a <g> group and calls D3 linkVertical", () => {
     drawLinks(svgContainer, mockRootNode);
 
-    // group created
     expect(svgContainer.append).toHaveBeenCalledWith("g");
-    // d3.linkVertical factory called once
     expect(d3.linkVertical).toHaveBeenCalledTimes(1);
   });
 
@@ -111,10 +105,7 @@ describe("drawLinks", () => {
   test("generates correct path data using d3.linkVertical", () => {
     drawLinks(svgContainer, mockRootNode);
 
-    // Verify generator function invoked
     expect(d3.linkVertical).toHaveBeenCalled();
-    // Since we mock linkVertical to return callable generator,
-    // its internal mock will have been executed once per link join
     expect(svgContainer.attr).toHaveBeenCalledWith("d", expect.any(Function));
   });
 });

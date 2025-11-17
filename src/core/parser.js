@@ -1,4 +1,3 @@
-
 export function validateModel(json) {
   const errors = [];
 
@@ -7,12 +6,10 @@ export function validateModel(json) {
     return { ok: false, errors };
   }
 
-
   if (!json.root) errors.push("Missing root");
   if (!Array.isArray(json.features)) errors.push("features must be array");
 
   if (Array.isArray(json.features)) {
-
     const ids = new Set();
     for (const f of json.features) {
       if (!f?.id) errors.push("Feature missing id");
@@ -20,7 +17,7 @@ export function validateModel(json) {
         if (ids.has(f.id)) errors.push(`Duplicate feature id: ${f.id}`);
         ids.add(f.id);
       }
-      if (f?.parent && !json.features.some(x => x.id === f.parent)) {
+      if (f?.parent && !json.features.some((x) => x.id === f.parent)) {
         errors.push(`Parent not found for ${f.id}: ${f.parent}`);
       }
     }
@@ -29,9 +26,8 @@ export function validateModel(json) {
     }
   }
 
-
   if (Array.isArray(json.constraints)) {
-    const featureIds = new Set((json.features || []).map(f => f.id));
+    const featureIds = new Set((json.features || []).map((f) => f.id));
     for (const c of json.constraints) {
       if (!["requires", "excludes"].includes(c.type)) {
         errors.push(`Invalid constraint type: ${c.type}`);
@@ -45,13 +41,6 @@ export function validateModel(json) {
   return { ok: errors.length === 0, errors };
 }
 
-/**
- * Calculates the associations that need to be highlighted when a feature is selected:
- *
- * @param {string} featureId
- * @param {Array<{type:'requires'|'excludes',a:string,b:string}>} constraints
- * @returns {{requires:string[], excludes:string[]}}
- */
 export function getRelationsFor(featureId, constraints) {
   const requires = [];
   const excludes = [];

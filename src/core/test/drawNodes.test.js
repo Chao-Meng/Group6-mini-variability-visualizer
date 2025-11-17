@@ -52,7 +52,6 @@ vi.mock("../search", () => ({
 import { searchFeatures } from "../search";
 import drawNodes from "../drawNodes";
 
-// ---- helper to make container ----
 function createMockContainer() {
   const sel = {
     append: vi.fn(function () {

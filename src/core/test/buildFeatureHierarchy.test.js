@@ -1,10 +1,6 @@
 import { describe, test, expect } from "vitest";
 import buildFeatureHierarchy from "../buildFeatureHierarchy";
 
-/**
- * Helper to simplify tree snapshots by extracting only IDs and children.
- * Prevents infinite recursion and avoids comparing full objects.
- */
 function flattenHierarchy(featureNodes) {
   return featureNodes.map((node) => ({
     id: node.id,
@@ -107,7 +103,7 @@ describe("buildFeatureHierarchy(): Hierarchical tree builder", () => {
   test("handles duplicate feature IDs gracefully (later entries overwrite earlier ones)", () => {
     const featureList = [
       { id: "Root", label: "First Root" },
-      { id: "Root", label: "Duplicate Root" }, // overwrite
+      { id: "Root", label: "Duplicate Root" },
       { id: "Child", label: "Child", parent: "Root" },
     ];
     const result = flattenHierarchy(buildFeatureHierarchy(featureList));
@@ -134,7 +130,6 @@ describe("buildFeatureHierarchy(): Hierarchical tree builder", () => {
       { id: "B", parent: "A" },
     ];
     const result = flattenHierarchy(buildFeatureHierarchy(featureList));
-    // Both become roots with no children (cycle broken)
     expect(result).toEqual([
       { id: "A", children: [] },
       { id: "B", children: [] },

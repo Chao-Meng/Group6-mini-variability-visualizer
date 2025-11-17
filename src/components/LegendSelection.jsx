@@ -1,4 +1,3 @@
-/* --------------------- LEGEND DATA --------------------- */
 const legendItems = [
   {
     shape: "circle",
@@ -58,13 +57,12 @@ const legendItems = [
     color: "#f48fb1",
     stroke: "#f48fb1",
     label: "Related Branch",
-    sub: "Ancestors and descendants of a highlight.",
+    sub: "Related nodes (ancestors / children). Ancestors and descendants of a highlight.",
   },
 ];
 import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-/* --------------------- HOOKS --------------------- */
 function useKeyboardShortcuts(toggleLegend, toggleFullscreen, isFullscreen) {
   useEffect(() => {
     const handleKey = (e) => {
@@ -94,7 +92,6 @@ export default function LegendSection({ isFullscreen, toggleFullscreen }) {
 
   return (
     <div className="w-full mt-4 bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg shadow-sm flex flex-col items-center transition-all duration-300">
-      {/* Buttons */}
       <div className="w-full flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white rounded-t-lg">
         <h3 className="text-gray-800 font-semibold text-sm tracking-wide">
           Visualizer Controls
@@ -139,7 +136,6 @@ export default function LegendSection({ isFullscreen, toggleFullscreen }) {
             </h3>
           </div>
 
-          {/* Feature Legend Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-4 mb-4">
             {legendItems.map((item, index) => (
               <div
@@ -182,7 +178,6 @@ export default function LegendSection({ isFullscreen, toggleFullscreen }) {
             ))}
           </div>
 
-          {/* Keyboard Shortcuts */}
           <div className="border-t border-gray-200 pt-4">
             <h4 className="text-gray-800 font-semibold text-sm mb-3">
               Keyboard Shortcuts

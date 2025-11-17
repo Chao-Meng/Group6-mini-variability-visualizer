@@ -5,7 +5,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import "@testing-library/jest-dom/vitest"; // <-- IMPORTANT FIX
+import "@testing-library/jest-dom/vitest"; 
 import ExampleDownloads from "../ExampleDownloads";
 
 const samples = [

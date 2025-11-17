@@ -3,10 +3,7 @@ import { useApp } from "../state/store";
 import { searchFeatures } from "../core/search";
 import { Search, XCircle } from "lucide-react";
 
-/**
- * ControlBar
- * Provides a live feature search input with result feedback and keyboard shortcut support.
- */
+
 export default function ControlBar() {
   const { model, setSearchHits, query, setQuery } = useApp();
   const [searchResultCount, setSearchResultCount] = useState(null);
@@ -24,7 +21,7 @@ export default function ControlBar() {
       return;
     }
 
-    // Always ensure matchedFeatures is an array
+    // Ensures matchedFeatures is an array
     const matchedFeatures = searchFeatures(featureList, trimmedQuery) || [];
     setSearchHits(matchedFeatures);
     setSearchResultCount(matchedFeatures.length);
@@ -48,13 +45,10 @@ export default function ControlBar() {
   return (
     <div className="w-full max-w-3xl mx-auto mt-2 mb-3 px-4">
       <div className="relative flex items-center">
-        {/* Search Icon */}
         <Search
           size={18}
           className="absolute left-4 text-gray-500 pointer-events-none"
         />
-
-        {/* Search Input Field */}
         <input
           id="feature-search-input"
           value={query}
@@ -65,7 +59,6 @@ export default function ControlBar() {
                      hover:border-gray-600 transition-all"
         />
 
-        {/* Clear Search Button */}
         {query && (
           <button
             type="button"
@@ -77,7 +70,6 @@ export default function ControlBar() {
           </button>
         )}
 
-        {/* Search Result Feedback */}
         {searchResultCount !== null && (
           <div className="absolute left-3 -bottom-7 text-xs font-mono text-gray-400 select-none">
             {searchResultCount > 0 ? (

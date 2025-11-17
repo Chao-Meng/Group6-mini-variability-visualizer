@@ -8,7 +8,7 @@ import { FileJson } from "lucide-react";
  */
 export default function JsonUploadInstructions() {
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 bg-gray-900/70 text-gray-200 rounded-2xl border border-gray-700 shadow-lg backdrop-blur-md">
+    <div className="w-full max-w-3xl mx-auto mt-6 p-6 bg-gray-900/70 text-gray-200 rounded-2xl border border-gray-700 shadow-lg backdrop-blur-md">
       <div className="flex items-center gap-2 mb-4">
         <FileJson size={22} className="text-blue-400" />
         <h2 className="text-xl font-semibold text-blue-300">
@@ -31,11 +31,11 @@ export default function JsonUploadInstructions() {
 
       <ul className="list-disc list-inside space-y-2 text-gray-300">
         <li>
-          <span className="font-semibold text-blue-400">root</span>:  a string
+          <span className="font-semibold text-blue-400">root</span>: a string
           naming the top-level feature.
         </li>
         <li>
-          <span className="font-semibold text-blue-400">features</span>:  an
+          <span className="font-semibold text-blue-400">features</span>: an
           array where each object describes one feature with:
           <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-gray-400">
             <li>
@@ -60,7 +60,7 @@ export default function JsonUploadInstructions() {
           </ul>
         </li>
         <li>
-          <span className="font-semibold text-blue-400">constraints</span>:  an
+          <span className="font-semibold text-blue-400">constraints</span>: an
           optional array where each object defines a relationship:
           <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-gray-400">
             <li>
